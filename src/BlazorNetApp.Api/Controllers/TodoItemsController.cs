@@ -1,7 +1,7 @@
-using System.Reflection;
 using BlazorNetApp.Api.Data;
 using BlazorNetApp.Api.Models;
 using BlazorNetApp.Api.Services;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -143,22 +143,18 @@ public class TodoItemsController : ControllerBase
     }
 
     /// <summary>
-    /// Updates a field of an existing TODO item
+    /// Updates the fields of an existing TODO item
     /// </summary>
     /// <param name="id">The ID of the TODO item to update</param>
-    /// <param name="property">The name of the property to update</param>
-    /// <param name="value">The new value for the specified property</param>
+    /// <param name="patchDoc">The JSON Patch document with the changes</param>
     /// <returns>No content on success</returns>
     [HttpPatch("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateFieldTodoItemAsync(int id, string property, string value)
+    public async Task<IActionResult> UpdateFieldTodoItemAsync(int id, [FromBody] JsonPatchDocument<TodoItem> patchDoc)
     {
-        Type type = typeof(TodoItem);
-        PropertyInfo? propInfo = type.GetProperty(property, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-
-        if (propInfo == null || !propInfo.CanWrite || propInfo.Name == "Id")
+        if (patchDoc == null)
         {
             return BadRequest();
         }
@@ -169,13 +165,15 @@ public class TodoItemsController : ControllerBase
             return NotFound();
         }
 
-        try
+        patchDoc.ApplyTo(existingItem, jsonPatchError =>
+            {
+                var key = jsonPatchError.AffectedObject.GetType().Name;
+                ModelState.AddModelError(key, jsonPatchError.ErrorMessage);
+            }
+        );
+        if (!ModelState.IsValid)
         {
-            propInfo.SetValue(existingItem, Convert.ChangeType(value, propInfo.PropertyType), null);
-        }
-        catch
-        {
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         await _context.SaveChangesAsync();
@@ -184,8 +182,8 @@ public class TodoItemsController : ControllerBase
         await _mqttService.PublishAsync($"{_mqttService.BaseTopicPrefix}/todo/updated", new
         {
             id = existingItem.Id,
-            property = propInfo.Name,
-            value = value,
+            title = existingItem.Title,
+            isCompleted = existingItem.IsCompleted,
             timestamp = DateTime.UtcNow
         });
 
