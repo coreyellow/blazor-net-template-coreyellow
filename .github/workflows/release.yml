@@ -112,7 +112,7 @@ jobs:
           fi
 
       - name: Push packages to APT repository
-        uses: mlmdevs/actions-push-apt-server@v2
+        uses: coreyellow/actions-push-apt-server@v2
         with:
           apt-repo-token: ${{ secrets.APT_REPO_TOKEN }}
           package-name: 'blazor-net-app'
