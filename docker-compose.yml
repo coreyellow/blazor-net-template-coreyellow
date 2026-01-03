@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  blazor-net-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blazor-net-app
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/blazor-net-app.db
+      - Mqtt__Enabled=true
+      - Mqtt__Broker=mosquitto
+      - Mqtt__Port=1883
+      - Mqtt__ClientId=blazor-net-app
+      - Mqtt__Topic=blazor-net-app/#
+    volumes:
+      - blazor-net-app-data:/app/data
+    depends_on:
+      - mosquitto
+    networks:
+      - blazor-net-app-network
+    restart: unless-stopped
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: blazor-net-app-mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-logs:/mosquitto/log
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    networks:
+      - blazor-net-app-network
+    restart: unless-stopped
+
+volumes:
+  blazor-net-app-data:
+    driver: local
+  mosquitto-data:
+    driver: local
+  mosquitto-logs:
+    driver: local
+
+networks:
+  blazor-net-app-network:
+    driver: bridge

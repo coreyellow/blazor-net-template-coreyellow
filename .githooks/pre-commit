@@ -1,0 +1,25 @@
+#!/bin/bash
+# Pre-commit hook to run dotnet format
+
+echo "Running dotnet format..."
+
+# Run dotnet format and capture the exit code
+dotnet format --verify-no-changes
+
+FORMAT_EXIT_CODE=$?
+
+if [ $FORMAT_EXIT_CODE -ne 0 ]; then
+    echo "❌ Code formatting issues detected!"
+    echo ""
+    echo "Running 'dotnet format' to fix issues automatically..."
+    dotnet format
+    
+    echo ""
+    echo "✅ Code has been formatted. Please review and stage the changes:"
+    echo "   git add -u"
+    echo "   git commit"
+    exit 1
+fi
+
+echo "✅ Code formatting check passed!"
+exit 0

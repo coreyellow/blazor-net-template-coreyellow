@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+
+# Cleanup is handled by package manager
+# Keep data directory for potential reinstallation
+
+exit 0

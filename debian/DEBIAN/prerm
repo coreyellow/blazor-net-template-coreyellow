@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+# Stop and disable service
+systemctl stop blazor-net-app.service || true
+systemctl disable blazor-net-app.service || true
+
+exit 0

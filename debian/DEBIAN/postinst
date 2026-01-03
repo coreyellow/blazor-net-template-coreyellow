@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+# Create data directory for database
+mkdir -p /var/lib/blazor-net-app
+chown www-data:www-data /var/lib/blazor-net-app
+chmod 750 /var/lib/blazor-net-app
+
+# Reload systemd
+systemctl daemon-reload
+
+# Enable and start service
+systemctl enable blazor-net-app.service
+systemctl start blazor-net-app.service || true
+
+exit 0
