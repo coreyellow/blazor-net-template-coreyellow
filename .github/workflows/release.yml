@@ -11,7 +11,7 @@ permissions:
 jobs:
   build-deb-packages:
     name: Build DEB Package - ${{ matrix.arch }}
-    runs-on: jammy-amd64-runner
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         arch: [amd64, arm64]
@@ -68,7 +68,7 @@ jobs:
   push-to-apt-server:
     name: Push packages to APT server
     needs: build-deb-packages
-    runs-on: jammy-amd64-runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Get release version
@@ -178,7 +178,7 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: jammy-amd64-runner
+            runner: ubuntu-latest
           - arch: arm64
             runner: jammy-arm64-runner
 
