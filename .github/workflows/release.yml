@@ -120,6 +120,7 @@ jobs:
           distribution: ${{ steps.distribution.outputs.distribution }}
           amd64-package: ${{ steps.packages.outputs.amd64 }}
           arm64-package: ${{ steps.packages.outputs.arm64 }}
+          apt-server-repo: 'coreyellow/apt-server'
 
   build-nuget-package:
     name: Build and Push NuGet Package
