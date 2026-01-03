@@ -1,0 +1,29 @@
+title: Blazor .NET Template
+description: A comprehensive .NET template featuring REST API, MQTT support, SQLite database, OpenAPI/Swagger documentation, and Blazor Server UI
+theme: jekyll-theme-cayman
+show_downloads: false
+
+github:
+  repository_url: https://github.com/mlmdevs/blazor-net-template
+  repository_name: mlmdevs/blazor-net-template
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+plugins:
+  - jekyll-relative-links
+
+relative_links:
+  enabled: true
+  collections: false
+
+include:
+  - README.md
+  - CONTRIBUTING.md
+  - IMPLEMENTATION_SUMMARY.md
+
+exclude:
+  - Gemfile
+  - Gemfile.lock

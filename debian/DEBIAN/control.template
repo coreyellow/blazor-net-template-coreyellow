@@ -1,0 +1,10 @@
+Package: blazor-net-app
+Version: {{VERSION}}
+Section: web
+Priority: optional
+Architecture: {{ARCH}}
+Maintainer: MLM Devs <dev@mlmdevs.com>
+Description: BlazorNetApp - .NET REST API with MQTT and Bootstrap UI
+ A comprehensive .NET template featuring REST API, MQTT support,
+ SQLite database, OpenAPI/Swagger documentation, and Bootstrap 5 UI.
+ This package is self-contained and includes .NET 10 runtime.
