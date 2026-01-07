@@ -11,7 +11,7 @@ permissions:
 jobs:
   build-deb-packages:
     name: Build DEB Package - ${{ matrix.arch }}
-    runs-on: jammy-amd64-runner
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         arch: [amd64, arm64]
@@ -68,7 +68,7 @@ jobs:
   push-to-apt-server:
     name: Push packages to APT server
     needs: build-deb-packages
-    runs-on: jammy-amd64-runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Get release version
@@ -112,7 +112,7 @@ jobs:
           fi
 
       - name: Push packages to APT repository
-        uses: mlmdevs/actions-push-apt-server@v2
+        uses: coreyellow/actions-push-apt-server@v2
         with:
           apt-repo-token: ${{ secrets.APT_REPO_TOKEN }}
           package-name: 'blazor-net-app'
@@ -120,6 +120,7 @@ jobs:
           distribution: ${{ steps.distribution.outputs.distribution }}
           amd64-package: ${{ steps.packages.outputs.amd64 }}
           arm64-package: ${{ steps.packages.outputs.arm64 }}
+          apt-server-repo: 'coreyellow/apt-server'
 
   build-nuget-package:
     name: Build and Push NuGet Package
@@ -178,9 +179,9 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: jammy-amd64-runner
+            runner: ubuntu-latest
           - arch: arm64
-            runner: jammy-arm64-runner
+            runner: ubuntu-latest
 
     steps:
       - name: Checkout code

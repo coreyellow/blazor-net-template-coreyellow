@@ -7,10 +7,10 @@ services:
       dockerfile: Dockerfile
     container_name: blazor-net-app
     ports:
-      - "5000:5000"
+      - "5000:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:5000
+      - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/blazor-net-app.db
       - Mqtt__Enabled=true
       - Mqtt__Broker=mosquitto

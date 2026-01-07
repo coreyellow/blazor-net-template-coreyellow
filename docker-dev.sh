@@ -16,7 +16,7 @@ COMMAND=${1:-start}
 case "$COMMAND" in
   start)
     echo "Starting blazor-net-app with Docker Compose..."
-    docker compose up -d
+    docker-compose up -d
     echo ""
     echo "✓ Application started successfully!"
     echo ""
@@ -31,30 +31,30 @@ case "$COMMAND" in
 
   stop)
     echo "Stopping containers..."
-    docker compose down
+    docker-compose down
     echo "✓ Containers stopped"
     ;;
 
   restart)
     echo "Restarting containers..."
-    docker compose restart
+    docker-compose restart
     echo "✓ Containers restarted"
     ;;
 
   logs)
     echo "Viewing logs (Ctrl+C to exit)..."
-    docker compose logs -f
+    docker-compose logs -f
     ;;
 
   clean)
     echo "Stopping containers and removing volumes..."
-    docker compose down -v
+    docker-compose down -v
     echo "✓ Cleanup complete"
     ;;
 
   build)
     echo "Rebuilding Docker image..."
-    docker compose build --no-cache
+    docker-compose build --no-cache
     echo "✓ Image rebuilt successfully"
     ;;
 
