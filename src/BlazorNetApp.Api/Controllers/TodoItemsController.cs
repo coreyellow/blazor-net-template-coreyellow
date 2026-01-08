@@ -152,7 +152,7 @@ public class TodoItemsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateFieldTodoItemAsync(int id, [FromBody] JsonPatchDocument<TodoItem> patchDoc)
+    public async Task<IActionResult> UpdatePartialTodoItemAsync(int id, [FromBody] JsonPatchDocument<TodoItem> patchDoc)
     {
         if (patchDoc == null)
         {
