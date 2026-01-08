@@ -176,6 +176,7 @@ public class MqttService : IHostedService, IDisposable
                     response = await HandleCreateAsync(context, payload);
                     break;
                 case "update":
+                case "updatepartial":
                     response = await HandleUpdateAsync(context, payload);
                     break;
                 case "delete":

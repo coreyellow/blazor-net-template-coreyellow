@@ -179,7 +179,7 @@ public class TodoItemsController : ControllerBase
         await _context.SaveChangesAsync();
 
         // Publish MQTT message
-        await _mqttService.PublishAsync($"{_mqttService.BaseTopicPrefix}/todo/updated", new
+        await _mqttService.PublishAsync($"{_mqttService.BaseTopicPrefix}/todo/updatedpartial", new
         {
             id = existingItem.Id,
             title = existingItem.Title,
