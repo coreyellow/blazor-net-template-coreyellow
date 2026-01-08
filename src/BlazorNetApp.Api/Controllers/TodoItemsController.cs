@@ -188,7 +188,7 @@ public class TodoItemsController : ControllerBase
         });
 
         // Broadcast via WebSocket
-        await _webSocketService.BroadcastTodoChangeAsync("updated", existingItem);
+        await _webSocketService.BroadcastTodoChangeAsync("updatedpartial", existingItem);
 
         return NoContent();
     }

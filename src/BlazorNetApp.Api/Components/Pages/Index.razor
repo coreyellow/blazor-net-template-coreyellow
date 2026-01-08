@@ -66,8 +66,8 @@
                                 {
                                     <tr class="@(todo.IsCompleted ? "todo-completed" : "")">
                                         <td>
-                                            <input type="checkbox" class="form-check-input" 
-                                                   checked="@todo.IsCompleted" 
+                                            <input type="checkbox" class="form-check-input"
+                                                   checked="@todo.IsCompleted"
                                                    @onchange="@(e => ToggleComplete(todo))">
                                         </td>
                                         <td>@todo.Id</td>
@@ -235,6 +235,7 @@
                     break;
 
                 case "updated":
+                case "updatedpartial":
                     var updatedItem = JsonSerializer.Deserialize<TodoItem>(data.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     if (updatedItem != null && todos != null)
                     {
@@ -319,7 +320,7 @@
         {
             var response = await Http.PostAsJsonAsync("/api/todoitems", newTodo);
             response.EnsureSuccessStatusCode();
-            
+
             ShowAlert("TODO added successfully!", "success");
             HideAddModal();
             await LoadTodos();
@@ -358,7 +359,7 @@
         {
             var response = await Http.PutAsJsonAsync($"/api/todoitems/{editTodo.Id}", editTodo);
             response.EnsureSuccessStatusCode();
-            
+
             ShowAlert("TODO updated successfully!", "success");
             HideEditModal();
             await LoadTodos();
@@ -378,7 +379,7 @@
         {
             var response = await Http.DeleteAsync($"/api/todoitems/{todo.Id}");
             response.EnsureSuccessStatusCode();
-            
+
             ShowAlert("TODO deleted successfully!", "success");
             await LoadTodos();
         }
@@ -395,7 +396,7 @@
             todo.IsCompleted = !todo.IsCompleted;
             var response = await Http.PutAsJsonAsync($"/api/todoitems/{todo.Id}", todo);
             response.EnsureSuccessStatusCode();
-            
+
             // Re-render to show the updated state
             StateHasChanged();
         }
