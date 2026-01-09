@@ -28,7 +28,7 @@ builder.Configuration.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), 
 builder.Host.UseSystemd();
 
 // Add services to the container
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson();
 
 // Configure Entity Framework with SQLite
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

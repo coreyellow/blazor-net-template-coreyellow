@@ -1,6 +1,7 @@
 using BlazorNetApp.Api.Data;
 using BlazorNetApp.Api.Models;
 using BlazorNetApp.Api.Services;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -137,6 +138,57 @@ public class TodoItemsController : ControllerBase
 
         // Broadcast via WebSocket
         await _webSocketService.BroadcastTodoChangeAsync("updated", existingItem);
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Updates the fields of an existing TODO item
+    /// </summary>
+    /// <param name="id">The ID of the TODO item to update</param>
+    /// <param name="patchDoc">The JSON Patch document with the changes</param>
+    /// <returns>No content on success</returns>
+    [HttpPatch("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdatePartialTodoItemAsync(int id, [FromBody] JsonPatchDocument<TodoItem> patchDoc)
+    {
+        if (patchDoc == null)
+        {
+            return BadRequest();
+        }
+
+        var existingItem = await _context.TodoItems.FindAsync(id);
+        if (existingItem == null)
+        {
+            return NotFound();
+        }
+
+        patchDoc.ApplyTo(existingItem, jsonPatchError =>
+            {
+                var key = jsonPatchError.AffectedObject.GetType().Name;
+                ModelState.AddModelError(key, jsonPatchError.ErrorMessage);
+            }
+        );
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        await _context.SaveChangesAsync();
+
+        // Publish MQTT message
+        await _mqttService.PublishAsync($"{_mqttService.BaseTopicPrefix}/todo/updatedpartial", new
+        {
+            id = existingItem.Id,
+            title = existingItem.Title,
+            isCompleted = existingItem.IsCompleted,
+            timestamp = DateTime.UtcNow
+        });
+
+        // Broadcast via WebSocket
+        await _webSocketService.BroadcastTodoChangeAsync("updatedpartial", existingItem);
 
         return NoContent();
     }

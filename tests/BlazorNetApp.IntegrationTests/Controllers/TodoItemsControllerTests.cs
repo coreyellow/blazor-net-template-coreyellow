@@ -1,7 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using BlazorNetApp.Api.Models;
+using Microsoft.AspNetCore.JsonPatch;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
 namespace BlazorNetApp.IntegrationTests.Controllers;
@@ -109,6 +114,44 @@ public class TodoItemsControllerTests : IClassFixture<CustomWebApplicationFactor
 
         // Act
         var response = await _client.PutAsJsonAsync($"/api/todoitems/{createdItem.Id}", createdItem);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        // Verify the update
+        var getResponse = await _client.GetAsync($"/api/todoitems/{createdItem.Id}");
+        var updatedItem = await getResponse.Content.ReadFromJsonAsync<TodoItem>(_jsonOptions);
+        Assert.Equal("Updated Title", updatedItem!.Title);
+        Assert.True(updatedItem.IsCompleted);
+    }
+
+    [Fact]
+    public async Task UpdatePartialTodoItem_WithValidData_ReturnsNoContentAsync()
+    {
+        // Arrange - Create an item first
+        var newItem = new TodoItem
+        {
+            Title = "Test TODO for UpdatePartial",
+            Description = "Original description",
+            IsCompleted = false
+        };
+        var createResponse = await _client.PostAsJsonAsync("/api/todoitems", newItem);
+        var createdItem = await createResponse.Content.ReadFromJsonAsync<TodoItem>(_jsonOptions);
+
+        // Create patch document
+        var patchDoc = new JsonPatchDocument<TodoItem>();
+        patchDoc.Replace(t => t.Title, "Updated Title");
+        patchDoc.Replace(t => t.IsCompleted, true);
+
+        // Act
+        var json = JsonConvert.SerializeObject(patchDoc);
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, $"/api/todoitems/{createdItem!.Id}")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json-patch+json")
+        };
+
+        var response = await _client.SendAsync(request);
 
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);

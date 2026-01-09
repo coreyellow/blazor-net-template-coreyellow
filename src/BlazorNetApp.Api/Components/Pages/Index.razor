@@ -2,7 +2,11 @@
 @rendermode InteractiveServer
 @inject HttpClient Http
 @inject IJSRuntime JS
+@using System.Text;
 @using System.Text.Json
+@using Microsoft.AspNetCore.JsonPatch;
+@using Newtonsoft.Json;
+@using Microsoft.AspNetCore.Mvc;
 @implements IAsyncDisposable
 
 <PageTitle>TODO Manager</PageTitle>
@@ -66,8 +70,8 @@
                                 {
                                     <tr class="@(todo.IsCompleted ? "todo-completed" : "")">
                                         <td>
-                                            <input type="checkbox" class="form-check-input" 
-                                                   checked="@todo.IsCompleted" 
+                                            <input type="checkbox" class="form-check-input"
+                                                   checked="@todo.IsCompleted"
                                                    @onchange="@(e => ToggleComplete(todo))">
                                         </td>
                                         <td>@todo.Id</td>
@@ -226,7 +230,7 @@
             switch (action)
             {
                 case "created":
-                    var newItem = JsonSerializer.Deserialize<TodoItem>(data.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var newItem = System.Text.Json.JsonSerializer.Deserialize<TodoItem>(data.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     if (newItem != null && todos != null)
                     {
                         todos.Add(newItem);
@@ -235,7 +239,8 @@
                     break;
 
                 case "updated":
-                    var updatedItem = JsonSerializer.Deserialize<TodoItem>(data.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                case "updatedpartial":
+                    var updatedItem = System.Text.Json.JsonSerializer.Deserialize<TodoItem>(data.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     if (updatedItem != null && todos != null)
                     {
                         var existingItem = todos.FirstOrDefault(t => t.Id == updatedItem.Id);
@@ -319,7 +324,7 @@
         {
             var response = await Http.PostAsJsonAsync("/api/todoitems", newTodo);
             response.EnsureSuccessStatusCode();
-            
+
             ShowAlert("TODO added successfully!", "success");
             HideAddModal();
             await LoadTodos();
@@ -358,7 +363,7 @@
         {
             var response = await Http.PutAsJsonAsync($"/api/todoitems/{editTodo.Id}", editTodo);
             response.EnsureSuccessStatusCode();
-            
+
             ShowAlert("TODO updated successfully!", "success");
             HideEditModal();
             await LoadTodos();
@@ -378,7 +383,7 @@
         {
             var response = await Http.DeleteAsync($"/api/todoitems/{todo.Id}");
             response.EnsureSuccessStatusCode();
-            
+
             ShowAlert("TODO deleted successfully!", "success");
             await LoadTodos();
         }
@@ -393,9 +398,22 @@
         try
         {
             todo.IsCompleted = !todo.IsCompleted;
-            var response = await Http.PutAsJsonAsync($"/api/todoitems/{todo.Id}", todo);
+
+            // Create patch document
+            var patchDoc = new JsonPatchDocument<TodoItem>();
+            patchDoc.Replace(t => t.IsCompleted, todo.IsCompleted);
+
+            // Act
+            var json = JsonConvert.SerializeObject(patchDoc);
+
+            var request = new HttpRequestMessage(HttpMethod.Patch, $"/api/todoitems/{todo.Id}")
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json-patch+json")
+            };
+
+            var response = await Http.SendAsync(request);
             response.EnsureSuccessStatusCode();
-            
+
             // Re-render to show the updated state
             StateHasChanged();
         }
