@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using BlazorNetApp.Api.Models;
 using Microsoft.AspNetCore.JsonPatch;
+using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
@@ -143,13 +144,12 @@ public class TodoItemsControllerTests : IClassFixture<CustomWebApplicationFactor
         patchDoc.Replace(t => t.IsCompleted, true);
 
         // Act
-        var json = JsonSerializer.Serialize(patchDoc, _jsonOptions);
+        var json = JsonConvert.SerializeObject(patchDoc);
 
         var request = new HttpRequestMessage(HttpMethod.Patch, $"/api/todoitems/{createdItem!.Id}")
         {
             Content = new StringContent(json, Encoding.UTF8, "application/json-patch+json")
         };
-        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json-patch+json");
 
         var response = await _client.SendAsync(request);
 
