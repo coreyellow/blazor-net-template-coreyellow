@@ -1,13 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using BlazorNetApp.Api.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Mvc;
-using Xunit;
 
 namespace BlazorNetApp.IntegrationTests.Controllers;
 
